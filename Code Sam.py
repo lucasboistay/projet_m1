@@ -56,8 +56,8 @@ plt.show()
 #HISTOGRAMME
 
 plt.hist(List_df, range = (-60,60), bins = 120)
-plt.xlabel('valeurs')
-plt.ylabel('nombres')
+plt.xlabel('''Nombre d'occurences''')
+plt.ylabel('Positions finales')
 plt.title('Exemple d\' histogramme simple')
 plt.show()
 #Variance = 2(t-t0)
@@ -73,6 +73,8 @@ for t in range(n_iterations):
     
 
 plt.plot(comptage,Var)
+plt.xlabel('temps écoulé')
+plt.ylabel('Variance')
 plt.show()
     
     
