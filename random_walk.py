@@ -127,7 +127,7 @@ def plot_variance_over_time(n_iterations: int, nb_run: int):
 
 # Example usage:
 n_iterations = 200
-nb_run = 2000
+nb_run = 20000
 x0 = 0
 
 plot_random_walks(n_iterations, nb_run)
