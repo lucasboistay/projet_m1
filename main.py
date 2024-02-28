@@ -4,52 +4,124 @@ from isingModel import IsingModel
 import matplotlib.pyplot as plt
 import time
 import numpy as np
+from multiprocessing import Pool
+from scipy.signal import savgol_filter
+import pandas as pd
 
-print("---- Creating the lattice ----")
-ising = IsingModel(50, 50, 300, 1000)
-# ising.initialize_lattice("random") # To get a random lattice
-ising.initialize_lattice(1) # To get a lattice with all 1's
-# ising.initialize_lattice(-1)  # To get a lattice with all -1's
-# ising.initialize_lattice(0) # To get a lattice with all 0's
+# Create N ising model and run the simulation to get the final energy and magnetization and plot it
 
-# information about the lattice
-starting_lattice = np.copy(ising.get_lattice())
+final_energy = []
+final_magnetization = []
 
-print(f"Total Energy {ising.get_total_energy()}")
-print(f"Total Magnetization {ising.magnetization()}")
 
-# Run Monte Carlo simulation
-print("---- Running Monte Carlo simulation ----")
-start = time.time()
-ising.run_monte_carlo()
-end = time.time()
-print("Simolation completed")
-print(f"New total Energy {ising.get_total_energy()}")
-print(f"New total Magnetization {ising.magnetization()}")
-print(f"Time taken {end - start} seconds")
-ending_lattice = np.copy(ising.get_lattice())
+def Onsager(Tc, T):
+    if T < Tc:
+        return (1 - 1 / (np.sinh(2 / T) ** 4)) ** (1 / 8)
+    else:
+        return 0
 
-# Plot the energy and magnetization
 
-plt.plot(ising.energy_history, label="Energy")
-plt.plot(ising.magnetization_history, label="Magnetization")
-plt.xlabel("Iteration")
-plt.ylabel("Energy")
-plt.legend()
-plt.savefig("data/energy_magnetization.png")
-plt.show()
+def run_model(N, M, temperature, iterations):
+    """
+    Run one Ising model
+    :param N: Number of rows
+    :param M: Number of columns
+    :param temperature: temperature
+    :param iterations: number of iterations
+    :return: final energy and magnetization
+    """
+    # Create an Ising model
+    ising = IsingModel(N, M, temperature, iterations)
 
-# Plot the lattice with heat map on the same figure
+    ising.initialize_lattice(1)  # To get a lattice with all 1's
 
-plt.figure()
-plt.subplot(1, 2, 1)
-plt.imshow(starting_lattice, cmap="hot")
-plt.title("Initial lattice")
+    # information about the lattice
+    starting_lattice = np.copy(ising.get_lattice())
 
-plt.subplot(1, 2, 2)
-plt.imshow(ending_lattice, cmap="hot")
-plt.title("Final lattice")
-plt.show()
+    # Run Monte Carlo simulation
+    ising.run_monte_carlo()
 
-plt.savefig("data/lattice.png")
+    ending_lattice = np.copy(ising.get_lattice())
 
+    return ising.get_total_energy(), ising.magnetization()
+
+def find_critical_temperature(temperature, magnetization):
+    """
+    Find the critical temperature
+    :param temperature: temperature
+    :param magnetization: magnetization
+    :return: critical temperature
+    """
+    # Find the critical temperature by finding the temperature where the magnetization is the most changing by derivate
+    smooth_magnetization = savgol_filter(magnetization, 20, 3)  # Smooth the magnetization
+    derivative = abs(np.gradient(smooth_magnetization, temperature))
+    max_derivative_index = np.argmax(derivative)
+
+    plt.figure(figsize=(14, 10))
+
+    plt.plot(temperature, derivative, label="Derivative of magnetization")
+    plt.plot(temperature,magnetization, label="Magnetization")
+    plt.plot(temperature,smooth_magnetization, label="Smoothed magnetization")
+    critical_temperature = temperature[max_derivative_index]
+    #plot the critical temperature line
+    plt.axvline(x=critical_temperature, color='red', linestyle='--',
+                label=r'Computated $T_c$')
+    plt.legend()
+    plt.xlabel(rf"Temperature /J")
+    plt.ylabel(rf"Magnetisation /µ")
+    plt.title(f'Critical temperature computation\nCritical temperature = {critical_temperature:.2f}')
+    plt.savefig(f"data/critical_temperature.png", dpi=300)
+    plt.show()
+    plt.close()
+    return critical_temperature
+
+
+# Run the model in parallel
+
+if __name__ == "__main__":
+    # Parameters
+    number_of_simulations = 100
+    number_of_pool_processes = 10 # Number of pool processes, do not set it to more than the number of cores of your CPU
+    N = 50
+    M = 50
+    iterations = 500000
+    temperatures = np.linspace(0.1, 4, number_of_simulations)
+
+    with Pool(number_of_pool_processes) as p:  # Run the model in parallel with a pool of processes
+        # v Run the model for each temperature v
+        results = p.starmap(run_model, [(N, M, temperature, iterations) for temperature in temperatures])
+        final_energy, final_magnetization = zip(*results)  # Unzip the results
+        p.close()  # Close the pool
+        p.join()  # Join the pool
+
+    # Normalisation
+    final_energy = np.array(final_energy) / (N * M)  # Normalise the final energy
+    final_magnetization = np.array(final_magnetization) / (N * M)  # Normalise the final magnetization
+
+    # Save the data in a txt file as a table
+
+    data = pd.DataFrame({'Temperature': temperatures, 'Energy': final_energy, 'Magnetization': final_magnetization})
+    data.to_csv('data/data.txt', index=False, sep='\t')
+
+    # Find the critical temperature
+
+    critical_temperature = find_critical_temperature(temperatures, final_magnetization)
+
+    # Plot the final energy and magnetization
+
+    onsager = [Onsager(2.269, T) for T in temperatures]
+
+    plt.figure(figsize=(14, 10))
+    plt.plot(temperatures, final_magnetization,'bo', label=rf"Simulation data (Monte Carlo)")
+    plt.plot(temperatures, onsager, 'g--',label=rf"Onsager solution (Analytical)")
+    # plot the critical temperature line
+    plt.axvline(x=2.269, color='green', linestyle='-', label=r"Analitical $T_c = 2.269$")
+    plt.axvline(x=critical_temperature, color='blue', linestyle='-', label=rf"Computated $T_c = {critical_temperature:.2f}$")
+    plt.xlabel(rf"Temperature /J")
+    plt.ylabel(rf"Magnetisation /µ")
+    plt.legend()
+    plt.axhline(c="k", linewidth=1)
+    plt.axvline(c="k", linewidth=1)
+    plt.title(f'Magnetisation vs Temperature\n(Lattice : {N}x{M}, {iterations} iterations)')
+    plt.savefig(f"data/magnetization.png", dpi=300)
+    plt.show()
