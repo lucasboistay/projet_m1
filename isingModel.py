@@ -7,6 +7,7 @@ from scipy import constants
 import numpy as np
 from multiprocessing import Pool
 from functools import partial
+import matplotlib.pyplot as plt
 # Physical constants
 
 K = 1
@@ -98,9 +99,11 @@ class IsingModel:
             pass
 
     def run_monte_carlo(self):
-        for _ in range(self.iteration):
+        # TODO: Enregistrer une image toute les X itérations pour faire une vidéo (modulo itération)
+        for i in range(self.iteration):
             self.monte_carlo_step()
         return self.lattice
+
 
     def parallel_monte_carlo_step(self, M, N, beta, iteration):
         # TODO: Implement parallel monte carlo step

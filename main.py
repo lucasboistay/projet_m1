@@ -38,7 +38,6 @@ def run_model(N, M, temperature, iterations):
     # information about the lattice
     starting_lattice = np.copy(ising.get_lattice())
 
-    # Run Monte Carlo simulation
     ising.run_monte_carlo()
 
     ending_lattice = np.copy(ising.get_lattice())
@@ -82,10 +81,25 @@ if __name__ == "__main__":
     # Parameters
     number_of_simulations = 100
     number_of_pool_processes = 10 # Number of pool processes, do not set it to more than the number of cores of your CPU
-    N = 50
-    M = 50
+    N = 100
+    M = 100
     iterations = 500000
     temperatures = np.linspace(0.1, 4, number_of_simulations)
+
+    # Run the model once for a plot of the magnetization lattice
+    # TODO
+
+    ising = IsingModel(N, M, 1, iterations)
+    ising.initialize_lattice(-1)  # To get a lattice with all 1's
+    ising.run_monte_carlo()
+    plt.figure(figsize=(14, 10))
+    plt.imshow(ising.get_lattice(), cmap='gray')
+    plt.title(f'Ising model lattice\n(Lattice : {N}x{M}, T = 2.269, {iterations} iterations)')
+    plt.savefig(f"data/lattice.png", dpi=300)
+    plt.show()
+    plt.close()
+
+    # Run the model in parallel
 
     with Pool(number_of_pool_processes) as p:  # Run the model in parallel with a pool of processes
         # v Run the model for each temperature v
