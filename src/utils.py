@@ -1,3 +1,12 @@
+"""
+This file contains the different function to run the Ising model in parallel or even to create a gif of the lattice
+magnetization. It also contains the function to find the critical temperature and the Onsager solution for the
+magnetization.
+
+@Author: Lucas BOISTAY
+@Date: 2024-02-28
+"""
+
 from src.isingModel import IsingModel
 from constants import N, M, iterations, t_min, t_max
 

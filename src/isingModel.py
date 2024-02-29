@@ -1,4 +1,5 @@
 """
+Ising model class
 author: 	Lucas BOISTAY
 date:		2024-02-28
 """
@@ -165,7 +166,7 @@ class IsingModel:
 
             print("Saving animation...")
             # Enregistrez l'animation au format GIF
-            # ani.save('ising.gif', writer='pillow', fps=30, dpi=100)
+            ani.save('ising.gif', writer='pillow', fps=30, dpi=100)
             plt.show()
             plt.close()
 

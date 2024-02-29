@@ -1,3 +1,10 @@
+"""
+To plot the different graphs of the Ising model
+
+@Author: Lucas BOISTAY
+@Date: 2024-02-29
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -32,7 +39,7 @@ def plot_critical_temperature(filename: str, temperature: np.ndarray, magnetizat
     plt.xlabel(rf"Temperature /J")
     plt.ylabel(rf"Magnetisation /µ")
     plt.title(f'Critical temperature computation\nCritical temperature = {critical_temperature:.2f}')
-    # plt.savefig(f"data/{filename}.png", dpi=300)
+    plt.savefig(f"data/{filename}.png", dpi=300)
     plt.show()
     plt.close()
 
@@ -72,5 +79,5 @@ def plot_data_from_file(filename: str) -> None:
     plt.axhline(c="k", linewidth=1)
     plt.axvline(c="k", linewidth=1)
     plt.title(f'Magnetisation vs Temperature\n(Lattice : {N}x{M}, {iterations} iterations)')
-    # plt.savefig(f"data/magnetization.png", dpi=300)
+    plt.savefig(f"data/magnetization.png", dpi=300)
     plt.show()
