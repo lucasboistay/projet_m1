@@ -3,19 +3,16 @@ author: 	Lucas BOISTAY
 date:		2024-02-28
 """
 
-from scipy import constants
 import numpy as np
-from multiprocessing import Pool
-from functools import partial
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from src.utils import printProgressBar
 
 # Physical constants
 
 K = 1
 J = 1  # Energy unit
 MU = 1  # Magnetic moment unit
+
 
 # Print iterations progress
 
@@ -33,13 +30,13 @@ class IsingModel:
     run_monte_carlo: Run Monte Carlo simulation
     """
 
-    def __init__(self, M=10, N=10, T=300, iteration=1000):
+    def __init__(self, M: int = 10, N: int = 10, T: float = 300, iteration: int = 1000):
         """
         Initialize Ising model
-        :param M: Number of rows
-        :param N: Number of columns
-        :param T: Temperature
-        :param iteration: Number of iterations
+        :param M: (int) Number of rows
+        :param N: (int) Number of columns
+        :param T: (float) Temperature
+        :param iteration: (int) Number of iterations
         """
         self.M = M  # Number of rows
         self.N = N  # Number of columns
@@ -48,14 +45,14 @@ class IsingModel:
         self.beta = 1 / (K * T)  # Beta
         self.lattice = np.zeros((M, N))
 
-        #self.energy_history = []
-        #self.magnetization_history = []
+        # self.energy_history = []
+        # self.magnetization_history = []
 
-    def initialize_lattice(self, lattice):
+    def initialize_lattice(self, lattice) -> np.ndarray:
         """
         Initialize lattice with different types
-        :param lattice: "random", 1, -1, 0
-        :return: The initialized lattice
+        :param lattice: (int or str) "random", 1, -1, 0
+        :return: (np.ndarray) The initialized lattice
         """
         # Initialize lattice for different types
         if lattice == "random":
@@ -70,26 +67,26 @@ class IsingModel:
             raise ValueError("Invalid lattice type")
         return self.lattice
 
-    def get_lattice(self):
+    def get_lattice(self) -> np.ndarray:
         """
         Get lattice
-        :return: lattice
+        :return: (np.ndarray) lattice
         """
         return self.lattice
 
-    def print_lattice(self):
+    def print_lattice(self) -> None:
         """
         Print lattice
         :return: None
         """
         print(self.lattice)
 
-    def energy(self, i, j):
+    def energy(self, i: int, j: int) -> float:
         """
         Calculate energy of a site
-        :param i: Row index
-        :param j: Column index
-        :return: Energy of the site
+        :param i: (int) Row index
+        :param j: (int) Column index
+        :return: (float) Energy of the site
         """
         return 2 * J * self.lattice[i, j] * (
                 self.lattice[(i + 1) % self.M, j] +
@@ -98,7 +95,7 @@ class IsingModel:
                 self.lattice[i, (j - 1) % self.N]
         )
 
-    def get_total_energy(self):
+    def get_total_energy(self) -> float:
         """
         Calculate total energy
         :return: Total energy
@@ -109,41 +106,41 @@ class IsingModel:
                 energy += self.energy(i, j)
         return energy
 
-    def magnetization(self):
+    def magnetization(self) -> float:
         """
         Calculate total magnetization
-        :return: Total magnetization
+        :return: (float) Total magnetization
         """
-        return abs(MU*np.sum(np.sum(self.lattice)))
+        return abs(MU * np.sum(np.sum(self.lattice)))
 
-    def flip_spin(self, i, j):
+    def flip_spin(self, i: int, j: int) -> None:
         """
         Flip the spin at site (i, j)
-        :param i: Row index
-        :param j: Column index
+        :param i: (int) Row index
+        :param j: (int) Column index
         :return: None
         """
         self.lattice[i, j] *= -1
 
-    def monte_carlo_step(self):
+    def monte_carlo_step(self) -> None:
         """
         One Monte Carlo step
         :return: None
         """
         i, j = np.random.randint(0, self.M), np.random.randint(0, self.N)  # Randomly select a site
 
-        e = self.energy(i, j)  # Calculate energy after flipping the spin
+        e = self.energy(i, j)  # Calculate energy at the site
 
         if e < 0 or np.random.random() < np.exp(-e * self.beta):  # Accept the flip with a certain probability
             self.flip_spin(i, j)
         else:  # If the flip is not accepted, flip the spin back
             pass
 
-    def run_monte_carlo(self, save_image=False):
+    def run_monte_carlo(self, save_image=False) -> np.ndarray:
         """
         Run Monte Carlo simulation, possibility to save a gif of the run.
-        :param save_image: Boolean to save the gif (default: False)
-        :return: final lattice
+        :param save_image: (bool) to save the gif (default: False)
+        :return: (np.ndarray) final lattice
         """
         # TODO: Enregistrer une image toute les X itérations pour faire une vidéo (modulo itération)
         images = []
@@ -154,7 +151,7 @@ class IsingModel:
             if save_image and i % (self.iteration // 200) == 0:
                 images.append(np.copy(self.lattice))
 
-        if save_image: # Save the animation
+        if save_image:  # Save the animation
             fig, ax = plt.subplots(figsize=(10, 10))
             ax.set_axis_off()
 
@@ -168,17 +165,8 @@ class IsingModel:
 
             print("Saving animation...")
             # Enregistrez l'animation au format GIF
-            ani.save('ising.gif', writer='pillow', fps=30, dpi=100)
-
+            # ani.save('ising.gif', writer='pillow', fps=30, dpi=100)
+            plt.show()
             plt.close()
 
         return self.lattice
-
-
-    def parallel_monte_carlo_step(self, M, N, beta, iteration):
-        # TODO: Implement parallel monte carlo step
-        pass
-
-    def run_parallel_monte_carlo(self):
-        # TODO Implement parallel monte carlo
-        pass
