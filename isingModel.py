@@ -34,6 +34,13 @@ class IsingModel:
     """
 
     def __init__(self, M=10, N=10, T=300, iteration=1000):
+        """
+        Initialize Ising model
+        :param M: Number of rows
+        :param N: Number of columns
+        :param T: Temperature
+        :param iteration: Number of iterations
+        """
         self.M = M  # Number of rows
         self.N = N  # Number of columns
         self.T = T  # Temperature
@@ -64,12 +71,26 @@ class IsingModel:
         return self.lattice
 
     def get_lattice(self):
+        """
+        Get lattice
+        :return: lattice
+        """
         return self.lattice
 
     def print_lattice(self):
+        """
+        Print lattice
+        :return: None
+        """
         print(self.lattice)
 
     def energy(self, i, j):
+        """
+        Calculate energy of a site
+        :param i: Row index
+        :param j: Column index
+        :return: Energy of the site
+        """
         return 2 * J * self.lattice[i, j] * (
                 self.lattice[(i + 1) % self.M, j] +
                 self.lattice[i, (j + 1) % self.N] +
@@ -78,6 +99,10 @@ class IsingModel:
         )
 
     def get_total_energy(self):
+        """
+        Calculate total energy
+        :return: Total energy
+        """
         energy = 0
         for i in range(self.M):
             for j in range(self.N):
@@ -85,12 +110,26 @@ class IsingModel:
         return energy
 
     def magnetization(self):
+        """
+        Calculate total magnetization
+        :return: Total magnetization
+        """
         return abs(MU*np.sum(np.sum(self.lattice)))
 
     def flip_spin(self, i, j):
+        """
+        Flip the spin at site (i, j)
+        :param i: Row index
+        :param j: Column index
+        :return: None
+        """
         self.lattice[i, j] *= -1
 
     def monte_carlo_step(self):
+        """
+        One Monte Carlo step
+        :return: None
+        """
         i, j = np.random.randint(0, self.M), np.random.randint(0, self.N)  # Randomly select a site
 
         e = self.energy(i, j)  # Calculate energy after flipping the spin
@@ -101,6 +140,11 @@ class IsingModel:
             pass
 
     def run_monte_carlo(self, save_image=False):
+        """
+        Run Monte Carlo simulation, possibility to save a gif of the run.
+        :param save_image: Boolean to save the gif (default: False)
+        :return: final lattice
+        """
         # TODO: Enregistrer une image toute les X itérations pour faire une vidéo (modulo itération)
         images = []
         for i in range(self.iteration):
