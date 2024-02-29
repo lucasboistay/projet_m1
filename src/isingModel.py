@@ -52,7 +52,7 @@ class IsingModel:
     def initialize_lattice(self, lattice) -> np.ndarray:
         """
         Initialize lattice with different types
-        :param lattice: (int or str) "random", 1, -1, 0
+        :param lattice: (int or str) "random", 1, -1
         :return: (np.ndarray) The initialized lattice
         """
         # Initialize lattice for different types
@@ -62,8 +62,6 @@ class IsingModel:
             self.lattice = np.ones((self.M, self.N))
         elif lattice == -1:
             self.lattice = -np.ones((self.M, self.N))
-        elif lattice == 0:
-            self.lattice = np.zeros((self.M, self.N))
         else:
             raise ValueError("Invalid lattice type")
         return self.lattice
@@ -143,30 +141,37 @@ class IsingModel:
         :param save_image: (bool) to save the gif (default: False)
         :return: (np.ndarray) final lattice
         """
-        # TODO: Enregistrer une image toute les X itérations pour faire une vidéo (modulo itération)
         images = []
+        print("Running monte carlo simulation...")
+
         for i in range(self.iteration):
             self.monte_carlo_step()
 
             # save an image to have 200 images at the end
-            if save_image and i % (self.iteration // 200) == 0:
+            if save_image and i % (self.iteration // 100) == 0:
                 images.append(np.copy(self.lattice))
 
+        print("Monte Carlo simulation finished")
+
         if save_image:  # Save the animation
+
             fig, ax = plt.subplots(figsize=(10, 10))
             ax.set_axis_off()
 
             ims = []
             for i in range(len(images)):
                 im = ax.imshow(images[i], cmap='gray', interpolation='nearest', animated=True, vmin=-1, vmax=1)
-                ax.set_title(rf"Ising Model Simulation ($\beta = {self.beta:.2f}$, iteration = {self.iteration})")
+                ax.set_title(rf"Ising Model Simulation ($\beta = {self.beta:.2f}$, iteration = {self.iteration:.0e})")
                 ims.append([im])
+
             print("Creating animation...")
+
             ani = animation.ArtistAnimation(fig, ims, interval=50, blit=True, repeat_delay=1000)
 
             print("Saving animation...")
+
             # Enregistrez l'animation au format GIF
-            ani.save('ising.gif', writer='pillow', fps=30, dpi=100)
+            ani.save('ising.gif', writer='pillow', fps=60, dpi=100)
             plt.show()
             plt.close()
 

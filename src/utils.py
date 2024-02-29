@@ -17,7 +17,7 @@ import time
 from scipy.signal import savgol_filter
 
 
-def find_critical_temperature(temperature: np.ndarray, magnetization: np.ndarray) -> float:
+def find_critical_temperature(temperature: np.ndarray, magnetization: np.ndarray) -> -(float, np.ndarray, np.ndarray):
     """
     Find the critical temperature
     :param temperature: (np.ndarray) Temperature array
@@ -33,7 +33,7 @@ def find_critical_temperature(temperature: np.ndarray, magnetization: np.ndarray
     return critical_temperature, smooth_magnetization, derivative
 
 
-def Onsager(Tc: float, T: np.ndarray) -> np.ndarray:
+def Onsager(Tc: float, T: float) -> float:
     """
     Onsager solution for the magnetization
     :param Tc: (float) Critical temperature
@@ -79,7 +79,7 @@ def create_gif(temperature: float, iterations: int) -> None:
     """
     print(f"------ Creating gif for T={temperature}... ------")
     ising = IsingModel(N, M, temperature, iterations)
-    ising.initialize_lattice(-1)  # To get a lattice with all 1's
+    ising.initialize_lattice("random")  # To get a lattice with all 1's
     ising.run_monte_carlo(save_image=True)
     print("Gif created and saved as ising.gif")
 
@@ -96,7 +96,7 @@ def run_parallel_ising(N_simulation: int, N_pool_processes: int, temperatures: n
     print("------ Running the model in parallel... ------")
     print(f"Number of simulations: {N_simulation}")
 
-    with Pool(N_pool_processes) as p:  # Run the model in parallel with a pool of processes
+    with Pool(N_pool_processes) as p:  # Run the model in parallel with a pool of processes, if not understood, it's ok
         # v Run the model for each temperature v
         print("Pool of processes created")
         start_time = time.time()
