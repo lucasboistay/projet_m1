@@ -8,14 +8,16 @@ import numpy as np
 from multiprocessing import Pool
 from functools import partial
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from src.utils import printProgressBar
+
 # Physical constants
 
 K = 1
 J = 1  # Energy unit
 MU = 1  # Magnetic moment unit
 
-
-# Ising model class
+# Print iterations progress
 
 class IsingModel:
     """
@@ -98,10 +100,34 @@ class IsingModel:
         else:  # If the flip is not accepted, flip the spin back
             pass
 
-    def run_monte_carlo(self):
+    def run_monte_carlo(self, save_image=False):
         # TODO: Enregistrer une image toute les X itérations pour faire une vidéo (modulo itération)
+        images = []
         for i in range(self.iteration):
             self.monte_carlo_step()
+
+            # save an image to have 200 images at the end
+            if save_image and i % (self.iteration // 200) == 0:
+                images.append(np.copy(self.lattice))
+
+        if save_image: # Save the animation
+            fig, ax = plt.subplots(figsize=(10, 10))
+            ax.set_axis_off()
+
+            ims = []
+            for i in range(len(images)):
+                im = ax.imshow(images[i], cmap='gray', interpolation='nearest', animated=True, vmin=-1, vmax=1)
+                ax.set_title(rf"Ising Model Simulation ($\beta = {self.beta:.2f}$, iteration = {self.iteration})")
+                ims.append([im])
+            print("Creating animation...")
+            ani = animation.ArtistAnimation(fig, ims, interval=50, blit=True, repeat_delay=1000)
+
+            print("Saving animation...")
+            # Enregistrez l'animation au format GIF
+            ani.save('ising.gif', writer='pillow', fps=30, dpi=100)
+
+            plt.close()
+
         return self.lattice
 
 
