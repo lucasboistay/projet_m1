@@ -26,8 +26,8 @@ if __name__ == "__main__":
 
     # Run the model in parallel
 
-    #run_parallel_ising(number_of_simulations, number_of_pool_processes, temperatures)
+    run_parallel_ising(number_of_simulations, number_of_pool_processes, temperatures)
 
     # Read the data from the file and plot it
 
-    #plot_data_from_file('data/data.txt')
+    plot_data_from_file('data/data.txt')
