@@ -96,7 +96,7 @@ class IsingModel:
 
     def get_total_energy(self) -> float:
         """
-        Calculate total energy
+        Calculate the total energy of the lattice
         :return: Total energy
         """
         energy = 0
@@ -121,7 +121,7 @@ class IsingModel:
         """
         self.lattice[i, j] *= -1
 
-    def monte_carlo_step(self) -> None:
+    def metropolis_step(self) -> None:
         """
         One Monte Carlo step
         :return: None
@@ -135,21 +135,31 @@ class IsingModel:
         else:  # If the flip is not accepted, flip the spin back
             pass
 
-    def run_monte_carlo(self, save_image=False) -> np.ndarray:
+    def run_monte_carlo(self, save_image=False) -> (float, float):
         """
         Run Monte Carlo simulation, possibility to save a gif of the run.
         :param save_image: (bool) to save the gif (default: False)
-        :return: (np.ndarray) final lattice
+        :return: (float, float) mean energy and mean magnetization
         """
+        # TODO : Store 1000 energy and magnetization values to get the mean and std
         images = []
         print("Running monte carlo simulation...")
+        mean_energy = 0
+        mean_magnetization = 0
 
         for i in range(self.iteration):
-            self.monte_carlo_step()
+            self.metropolis_step()
 
             # save an image to have 200 images at the end
             if save_image and i % (self.iteration // 100) == 0:
                 images.append(np.copy(self.lattice))
+            # To get the mean energy and magnetization of the last 1000 iterations
+            if i > self.iteration - 1000:
+                mean_energy += self.get_total_energy()
+                mean_magnetization += self.magnetization()
+
+        mean_energy /= 1000
+        mean_magnetization /= 1000
 
         print("Monte Carlo simulation finished")
 
@@ -175,4 +185,4 @@ class IsingModel:
             plt.show()
             plt.close()
 
-        return self.lattice
+        return mean_energy, mean_magnetization
