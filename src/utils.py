@@ -17,7 +17,7 @@ import time
 from scipy.signal import savgol_filter
 
 
-def find_critical_temperature(temperature: np.ndarray, magnetization: np.ndarray) -> -(float, np.ndarray, np.ndarray):
+def find_critical_temperature(temperature: np.ndarray, magnetization: np.ndarray) -> (float, np.ndarray, np.ndarray):
     """
     Find the critical temperature
     :param temperature: (np.ndarray) Temperature array
@@ -60,14 +60,9 @@ def run_model(N: int, M: int, temperature: float, iterations: int) -> (float, fl
 
     ising.initialize_lattice(1)  # To get a lattice with all 1's
 
-    # information about the lattice
-    starting_lattice = np.copy(ising.get_lattice())
+    energy, magnetisation = ising.run_monte_carlo()
 
-    ising.run_monte_carlo()
-
-    ending_lattice = np.copy(ising.get_lattice())
-
-    return ising.get_total_energy(), ising.magnetization()
+    return energy, magnetisation
 
 
 def create_gif(temperature: float, iterations: int) -> None:
@@ -115,6 +110,6 @@ def run_parallel_ising(N_simulation: int, N_pool_processes: int, temperatures: n
     # Save the data in a txt file as a table
 
     data = pd.DataFrame({'Temperature': temperatures, 'Energy': final_energy, 'Magnetization': final_magnetization})
-    # data.to_csv('data/data.txt', index=False, sep='\t')
+    data.to_csv('data/data.txt', index=False, sep='\t')
 
     print("Data saved in data/data.txt")
