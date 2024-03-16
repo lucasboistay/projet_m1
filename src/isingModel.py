@@ -11,7 +11,6 @@ import matplotlib.animation as animation
 # Physical constants
 
 K = 1
-J = 1  # Energy unit
 MU = 1  # Magnetic moment unit
 
 
@@ -31,7 +30,7 @@ class IsingModel:
     run_monte_carlo: Run Monte Carlo simulation
     """
 
-    def __init__(self, M: int = 10, N: int = 10, T: float = 300, iteration: int = 1000):
+    def __init__(self, M: int = 10, N: int = 10, T: float = 300, iteration: int = 1000, J: float = 1):
         """
         Initialize Ising model
         :param M: (int) Number of rows
@@ -45,6 +44,7 @@ class IsingModel:
         self.iteration = iteration  # Number of iterations
         self.beta = 1 / (K * T)  # Beta
         self.lattice = np.zeros((M, N))
+        self.J = J  # Interaction constant
 
         # self.energy_history = []
         # self.magnetization_history = []
@@ -87,7 +87,7 @@ class IsingModel:
         :param j: (int) Column index
         :return: (float) Energy of the site
         """
-        return 2 * J * self.lattice[i, j] * (
+        return 2 * self.J * self.lattice[i, j] * (
                 self.lattice[(i + 1) % self.M, j] +
                 self.lattice[i, (j + 1) % self.N] +
                 self.lattice[(i - 1) % self.M, j] +
@@ -141,7 +141,7 @@ class IsingModel:
         :param save_image: (bool) to save the gif (default: False)
         :return: (float, float) mean energy and mean magnetization
         """
-        # TODO : Store 1000 energy and magnetization values to get the mean and std
+
         images = []
         print("Running monte carlo simulation...")
         mean_energy = 0
@@ -150,16 +150,16 @@ class IsingModel:
         for i in range(self.iteration):
             self.metropolis_step()
 
-            # save an image to have 200 images at the end
+            # save an image to have 100 images at the end
             if save_image and i % (self.iteration // 100) == 0:
                 images.append(np.copy(self.lattice))
-            # To get the mean energy and magnetization of the last 1000 iterations
-            if i > self.iteration - 1000:
-                mean_energy += self.get_total_energy()
+            # To get the mean energy and magnetization of 100 values in the last 10000 iterations
+            if i >= self.iteration - 10000 and i % 100 == 0:
+                mean_energy += self.get_total_energy() # because it's very expensive to calculate the energy
                 mean_magnetization += self.magnetization()
 
-        mean_energy /= 1000
-        mean_magnetization /= 1000
+        mean_energy /= 100
+        mean_magnetization /= 100
 
         print("Monte Carlo simulation finished")
 

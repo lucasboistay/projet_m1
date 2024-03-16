@@ -4,12 +4,12 @@
 
 N = 100 # Number of rows
 M = 100 # Number of columns
-iterations = 100000 # Number of iterations
+iterations = 1000000 # Number of iterations
 
 # Parallel processing constants
 
 number_of_simulations = 100 # Number of simulations for the critical temperature computation
-number_of_pool_processes = 10  # Number of pool processes, do not set it to more than the number of cores of your CPU
+number_of_pool_processes = 8  # Number of pool processes, do not set it to more than the number of cores of your CPU
 
 # Temperature constants
 

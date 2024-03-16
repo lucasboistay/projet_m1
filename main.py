@@ -4,7 +4,7 @@ This is the main file of the project. It will run the Ising model in parallel an
 @Date: 2024-02-29
 """
 
-from src.utils import create_gif, run_parallel_ising
+from src.utils import create_gif, run_parallel_ising, test_different_J_values
 from src.graphs import plot_data_from_file
 from constants import t_min, t_max, iterations, N, M, number_of_simulations, number_of_pool_processes
 
@@ -19,15 +19,22 @@ if __name__ == "__main__":
     # Parameters
 
     temperatures = np.linspace(t_min, t_max, number_of_simulations)
+    #TODO: Mettre plus de points autour de la température critique pour un meilleur résultat
 
     # Run the model once for a gif of the magnetization lattice
 
-    create_gif(2.269, iterations)
+    #create_gif(2.269, iterations)
 
     # Run the model in parallel
 
-    run_parallel_ising(number_of_simulations, number_of_pool_processes, temperatures)
+    #run_parallel_ising(number_of_simulations, number_of_pool_processes, temperatures)
 
     # Read the data from the file and plot it
 
-    plot_data_from_file('data/data.txt')
+    #plot_data_from_file('data/data.txt')
+
+    # Run for different J values
+
+    J_values = [0.1, 0.3, 0.7, 1.3, 1.5, 2]
+
+    test_different_J_values(J_values, temperatures)
