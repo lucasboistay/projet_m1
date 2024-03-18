@@ -135,7 +135,7 @@ class IsingModel:
         else:  # If the flip is not accepted, flip the spin back
             pass
 
-    def run_monte_carlo(self, save_image=False) -> (float, float):
+    def run_monte_carlo(self, save_image=False) -> (float, float, float, float):
         """
         Run Monte Carlo simulation, possibility to save a gif of the run.
         :param save_image: (bool) to save the gif (default: False)
@@ -144,8 +144,8 @@ class IsingModel:
 
         images = []
         print("Running monte carlo simulation...")
-        mean_energy = 0
-        mean_magnetization = 0
+        energy = []
+        magnetization = []
 
         for i in range(self.iteration):
             self.metropolis_step()
@@ -155,15 +155,17 @@ class IsingModel:
                 images.append(np.copy(self.lattice))
             # To get the mean energy and magnetization of 100 values in the last 10000 iterations
             if i >= self.iteration - 10000 and i % 100 == 0:
-                mean_energy += self.get_total_energy() # because it's very expensive to calculate the energy
-                mean_magnetization += self.magnetization()
+                energy.append(self.get_total_energy())
+                magnetization.append(self.magnetization())
 
-        mean_energy /= 100
-        mean_magnetization /= 100
+        mean_energy = np.mean(energy)
+        mean_magnetization = np.mean(magnetization)
+        specific_heat = np.var(energy)
+        susceptibility = np.var(magnetization)
 
         print("Monte Carlo simulation finished")
 
-        if save_image:  # Save the animation
+        if save_image:  # Save the animation gif
 
             fig, ax = plt.subplots(figsize=(10, 10))
             ax.set_axis_off()
@@ -181,8 +183,10 @@ class IsingModel:
             print("Saving animation...")
 
             # Enregistrez l'animation au format GIF
-            ani.save('ising.gif', writer='pillow', fps=60, dpi=100)
+            ani.save('ising.gif', writer='pillow', fps=60, dpi=150)
+            # Enregistrez l'animation au format MP4
+            # ani.save('ising.mp4', writer='ffmpeg', fps=60, dpi=150)
             plt.show()
             plt.close()
 
-        return mean_energy, mean_magnetization
+        return mean_energy, mean_magnetization, specific_heat, susceptibility

@@ -8,17 +8,18 @@ magnetization.
 """
 
 from src.isingModel import IsingModel
-from constants import N, M, iterations, t_min, t_max, number_of_pool_processes, number_of_simulations
+from constants import N, M, iterations, t_min, t_max, number_of_pool_processes, number_of_simulations, J_values
 
 import numpy as np
 import pandas as pd
 from multiprocessing import Pool
 import time
 from scipy.signal import savgol_filter
+import matplotlib.pyplot as plt
 
 
 # Print iterations progress
-def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█', printEnd="\r"):
     """
     Call in a loop to create terminal progress bar
     @params:
@@ -34,10 +35,11 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filledLength = int(length * iteration // total)
     bar = fill * filledLength + '-' * (length - filledLength)
-    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end=printEnd)
     # Print New Line on Complete
     if iteration == total:
         print()
+
 
 def find_critical_temperature(temperature: np.ndarray, magnetization: np.ndarray) -> (float, np.ndarray, np.ndarray):
     """
@@ -67,8 +69,31 @@ def Onsager(Tc: float, T: float) -> float:
     else:
         return 0
 
+def get_temperature_list(t_min: float, t_max: float, number_of_simulations: int, J: float, sigma: float) \
+        -> np.ndarray:
+    """
+    Get the temperature list (Gaussian distribution around critical temperature)
+    :param t_min: (float) Minimum temperature
+    :param t_max: (float) Maximum temperature
+    :param J: (float) Interaction constant
+    :return: (np.ndarray) Temperature list
+    """
+    # Get the temperature list
+    critical_temp = 2.269*J
+    number_of_points = 10
+    gauss = np.zeros(number_of_points)
+    i=0
 
-def run_model(N: int, M: int, temperature: float, iterations: int, J: float) -> (float, float):
+    while i < number_of_points:
+        new_value = np.random.normal(critical_temp, sigma, 1)
+        if t_min <= new_value <= t_max:
+            gauss[i] = new_value
+            i+=1
+
+    return gauss
+
+
+def run_model(N: int, M: int, temperature: float, iterations: int, J: float) -> (float, float, float, float):
     """
     Run one Ising model
     :param N: (int) Number of rows
@@ -83,9 +108,9 @@ def run_model(N: int, M: int, temperature: float, iterations: int, J: float) -> 
 
     ising.initialize_lattice(1)  # To get a lattice with all 1's
 
-    energy, magnetisation = ising.run_monte_carlo()
+    energy, magnetisation, specific_heat, susceptibility = ising.run_monte_carlo()
 
-    return energy, magnetisation
+    return energy, magnetisation, specific_heat, susceptibility
 
 
 def create_gif(temperature: float, iterations: int) -> None:
@@ -102,7 +127,7 @@ def create_gif(temperature: float, iterations: int) -> None:
     print("Gif created and saved as ising.gif")
 
 
-def run_parallel_ising(N_simulation: int, N_pool_processes: int, temperatures: np.ndarray, J:float = 1) -> None:
+def run_parallel_ising(N_simulation: int, N_pool_processes: int, temperatures: np.ndarray, J: float = 1) -> None:
     """
     Run the Ising model in parallel
     :param N_simulation: (int) Number of simulations
@@ -120,7 +145,7 @@ def run_parallel_ising(N_simulation: int, N_pool_processes: int, temperatures: n
         print("Pool of processes created")
         start_time = time.time()
         results = p.starmap(run_model, [(N, M, temperature, iterations, J) for temperature in temperatures])
-        final_energy, final_magnetization = zip(*results)  # Unzip the results
+        final_energy, final_magnetization, specific_heat, susceptibility = zip(*results)  # Unzip the results
         end_time = time.time()
         p.close()  # Close the pool
         print("Pool of processes closed")
@@ -128,16 +153,20 @@ def run_parallel_ising(N_simulation: int, N_pool_processes: int, temperatures: n
         p.join()  # Join the pool
 
     # Normalisation
-    final_energy = np.array(final_energy) / (N * M)  # Normalise the final energy
-    final_magnetization = np.array(final_magnetization) / (N * M)  # Normalise the final magnetization
+    final_energy = np.array(final_energy) / (N*M*J)  # Normalise the final energy
+    final_magnetization = np.array(final_magnetization) / (N*M)  # Normalise the final magnetization
+    specific_heat = np.array(specific_heat) / (N*M*J)  # Normalise the specific heat
+    susceptibility = np.array(susceptibility) / (N*M)  # Normalise the susceptibility
 
     # Save the data in a txt file as a table
 
-    data = pd.DataFrame({'Temperature': temperatures, 'Energy': final_energy, 'Magnetization': final_magnetization})
-    nom_fichier = f'data/_iter_10e{int(np.log10(iterations))}_J_{int(J)}_data.txt'
+    data = pd.DataFrame({'Temperature': temperatures, 'Energy': final_energy, 'Magnetization': final_magnetization,
+                         'Specific heat': specific_heat, 'Susceptibility': susceptibility})
+    nom_fichier = f'data/iter_10e{int(np.log10(iterations))}_J_{J}.txt'
     data.to_csv(nom_fichier, index=False, sep='\t')
 
     print(f"Data saved in {nom_fichier}")
+
 
 def test_different_J_values(J_values: list[float], temperatures: np.ndarray) -> None:
     """
@@ -155,3 +184,19 @@ def test_different_J_values(J_values: list[float], temperatures: np.ndarray) -> 
         # Run the model in parallel
         run_parallel_ising(number_of_simulations, number_of_pool_processes, temperatures, J)
     print("------ Testing different J values done ------\n")
+
+def renormalise(J_tab: list[float]):
+    """
+    Renormalise the data for every file in data/
+    :param J_tab:
+    :return:
+    """
+    # get all .txt files in data/
+    import os
+    data_files = os.listdir('data/')
+    data_files = [file for file in data_files if file.endswith('.txt')]
+    for (J,file) in zip(J_tab,data_files):
+        data = pd.read_csv('data/' + file, sep='\t')
+        data[f'Susceptibility'] = data['Susceptibility'] * J
+        data.to_csv('data/' + file, index=False, sep='\t')
+        print(f"Data renormalised for {file}")
