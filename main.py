@@ -4,12 +4,11 @@ This is the main file of the project. It will run the Ising model in parallel an
 @Date: 2024-02-29
 """
 
-from src.utils import create_gif, run_parallel_ising, test_different_J_values, renormalise, get_temperature_list
-from src.graphs import plot_data_from_file, plot_different_J_graph
-from constants import t_min, t_max, iterations, N, M, number_of_simulations, number_of_pool_processes, J_values
-
 import numpy as np
-import matplotlib.pyplot as plt
+
+from constants import number_of_simulations, J_values
+from src.graphs import plot_different_J_graph_magnetization, plot_different_J_graph_energy, plot_magnetization_and_energy
+
 # Create N ising model and run the simulation to get the final energy and magnetization and plot it
 
 final_energy = []
@@ -17,22 +16,8 @@ final_magnetization = []
 
 
 if __name__ == "__main__":
-    # To get the temperature list
-    temperatures = np.zeros(1)
-    for J in J_values:
-        new_temperatures = get_temperature_list(t_min, t_max, number_of_simulations, J, 0.5*J)
-        temperatures = np.concatenate((temperatures, new_temperatures))
-    # ajout température linéaire
-    linear_temperatures = np.linspace(t_min, t_max, num=number_of_simulations-len(temperatures))
-    temperatures = np.concatenate((temperatures, linear_temperatures))
-    temperatures.sort()
-    print(temperatures.size)
 
-    plt.plot(temperatures, np.zeros(len(temperatures)), 'o')
-    plt.show()
-
-
-    #TODO: Mettre plus de points autour de la température critique pour un meilleur résultat
+    temperature_list = [np.random.normal(2.269*J, 2*J, number_of_simulations) for J in J_values]
 
     # Run the model once for a gif of the magnetization lattice
 
@@ -50,4 +35,6 @@ if __name__ == "__main__":
 
     #test_different_J_values(J_values, temperatures)
 
-    #plot_different_J_graph()
+    #plot_different_J_graph_magnetization()
+    #plot_different_J_graph_energy()
+    plot_magnetization_and_energy()

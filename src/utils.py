@@ -80,13 +80,13 @@ def get_temperature_list(t_min: float, t_max: float, number_of_simulations: int,
     """
     # Get the temperature list
     critical_temp = 2.269*J
-    number_of_points = 10
-    gauss = np.zeros(number_of_points)
+    number_of_points = 100
+    gauss = np.ones(number_of_points)
     i=0
 
     while i < number_of_points:
         new_value = np.random.normal(critical_temp, sigma, 1)
-        if t_min <= new_value <= t_max:
+        if t_min < new_value < t_max:
             gauss[i] = new_value
             i+=1
 
@@ -197,6 +197,6 @@ def renormalise(J_tab: list[float]):
     data_files = [file for file in data_files if file.endswith('.txt')]
     for (J,file) in zip(J_tab,data_files):
         data = pd.read_csv('data/' + file, sep='\t')
-        data[f'Susceptibility'] = data['Susceptibility'] * J
+        data[f'Temperature'] = data['Temperature'] * J
         data.to_csv('data/' + file, index=False, sep='\t')
         print(f"Data renormalised for {file}")
