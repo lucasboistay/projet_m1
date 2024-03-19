@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     # Run for different J values
 
-    test_different_J_values(J_values, temperatures)
+    #test_different_J_values(J_values, temperatures)
 
     plot_different_J_graph_magnetization()
     plot_different_J_graph_energy()

@@ -15,7 +15,7 @@ import sys
 
 from src.utils import find_critical_temperature
 from src.utils import Onsager
-from constants import N, M, iterations, t_min, t_max
+from constants import N, M, iterations, t_min, t_max, J_values
 
 
 def plot_critical_temperature(filename: str, temperature: np.ndarray, magnetization: np.ndarray,
@@ -99,7 +99,6 @@ def plot_data_from_file(filename: str) -> None:
     #plt.show()
 
 def plot_different_J_graph_magnetization() -> None:
-    J_values = [0.1, 0.3, 0.7, 1.3, 1.5, 2]
     colors = ['b', 'g', 'r', 'c', 'm', 'y']
 
     # Read all datafile .txt in the data/ folder
@@ -141,7 +140,6 @@ def plot_different_J_graph_magnetization() -> None:
     plt.close()
 
 def plot_different_J_graph_energy() -> None:
-    J_values = [0.1, 0.3, 0.7, 1.3, 1.5, 2]
     colors = ['b', 'g', 'r', 'c', 'm', 'y']
 
     # Read all datafile .txt in the data/ folder
@@ -178,7 +176,6 @@ def plot_different_J_graph_energy() -> None:
     plt.close()
 
 def plot_magnetization_and_energy() -> None:
-    J_values = [0.1, 0.3, 0.7, 1.3, 1.5, 2]
     colors = ['b', 'g', 'r', 'c', 'm', 'y']
 
     # Read all data files in the data/ folder that end with .txt
