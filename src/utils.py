@@ -17,9 +17,10 @@ import time
 from scipy.signal import savgol_filter
 import matplotlib.pyplot as plt
 
+n_parrallel_done = 0
 
 # Print iterations progress
-def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█', printEnd="\r"):
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
     """
     Call in a loop to create terminal progress bar
     @params:
@@ -35,11 +36,10 @@ def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filledLength = int(length * iteration // total)
     bar = fill * filledLength + '-' * (length - filledLength)
-    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end=printEnd)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
     # Print New Line on Complete
-    if iteration == total:
+    if iteration == total: 
         print()
-
 
 def find_critical_temperature(temperature: np.ndarray, magnetization: np.ndarray) -> (float, np.ndarray, np.ndarray):
     """
@@ -103,13 +103,16 @@ def run_model(N: int, M: int, temperature: float, iterations: int, J: float) -> 
     :param J: (float) Interaction constant
     :return: (float, float) final energy and magnetization
     """
+    global n_parrallel_done
+
     # Create an Ising model
     ising = IsingModel(N, M, temperature, iterations, J)
 
     ising.initialize_lattice(1)  # To get a lattice with all 1's
 
     energy, magnetisation, specific_heat, susceptibility = ising.run_monte_carlo()
-
+    n_parrallel_done += 1
+    printProgressBar(n_parrallel_done*3, number_of_simulations, prefix = 'Progress:', suffix = 'Complete', length = 50)
     return energy, magnetisation, specific_heat, susceptibility
 
 
@@ -139,7 +142,7 @@ def run_parallel_ising(N_simulation: int, N_pool_processes: int, temperatures: n
 
     print("------ Running the model in parallel... ------")
     print(f"Number of simulations: {N_simulation}")
-
+    # Initial call to print 0% progress
     with Pool(N_pool_processes) as p:  # Run the model in parallel with a pool of processes, if not understood, it's ok
         # v Run the model for each temperature v
         print("Pool of processes created")
@@ -175,7 +178,7 @@ def test_different_J_values(J_values: list[float], temperatures: np.ndarray) -> 
     :param temperatures: (np.ndarray) Temperatures array
     :return: None
     """
-
+    global n_parrallel_done
     print("------ Testing different J values... ------")
     # Different J values
 
@@ -183,6 +186,7 @@ def test_different_J_values(J_values: list[float], temperatures: np.ndarray) -> 
         print(f"J = {J}\n")
         # Run the model in parallel
         run_parallel_ising(number_of_simulations, number_of_pool_processes, temperatures, J)
+        n_parrallel_done = 0
     print("------ Testing different J values done ------\n")
 
 def renormalise(J_tab: list[float]):

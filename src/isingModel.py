@@ -143,7 +143,6 @@ class IsingModel:
         """
 
         images = []
-        print("Running monte carlo simulation...")
         energy = []
         magnetization = []
 
@@ -162,8 +161,6 @@ class IsingModel:
         mean_magnetization = np.mean(magnetization)
         specific_heat = np.var(energy)
         susceptibility = np.var(magnetization)
-
-        print("Monte Carlo simulation finished")
 
         if save_image:  # Save the animation gif
 

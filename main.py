@@ -6,8 +6,9 @@ This is the main file of the project. It will run the Ising model in parallel an
 
 import numpy as np
 
-from constants import number_of_simulations, J_values
+from constants import number_of_simulations, J_values, t_min, t_max, iterations
 from src.graphs import plot_different_J_graph_magnetization, plot_different_J_graph_energy, plot_magnetization_and_energy
+from src.utils import create_gif, test_different_J_values
 
 # Create N ising model and run the simulation to get the final energy and magnetization and plot it
 
@@ -17,7 +18,7 @@ final_magnetization = []
 
 if __name__ == "__main__":
 
-    temperature_list = [np.random.normal(2.269*J, 2*J, number_of_simulations) for J in J_values]
+    temperatures = np.linspace(t_min, t_max, number_of_simulations)
 
     # Run the model once for a gif of the magnetization lattice
 
@@ -33,8 +34,8 @@ if __name__ == "__main__":
 
     # Run for different J values
 
-    #test_different_J_values(J_values, temperatures)
+    test_different_J_values(J_values, temperatures)
 
-    #plot_different_J_graph_magnetization()
-    #plot_different_J_graph_energy()
+    plot_different_J_graph_magnetization()
+    plot_different_J_graph_energy()
     plot_magnetization_and_energy()

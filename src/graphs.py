@@ -44,7 +44,7 @@ def plot_critical_temperature(filename: str, temperature: np.ndarray, magnetizat
     plt.ylabel(rf"Magnetisation /µ")
     plt.title(f'Critical temperature computation\nCritical temperature = {critical_temperature:.2f}')
     plt.savefig(f"data/{filename}.png", dpi=300)
-    plt.show()
+    #plt.show()
     plt.close()
 
 
@@ -84,7 +84,7 @@ def plot_data_from_file(filename: str) -> None:
     plt.axvline(c="k", linewidth=1)
     plt.title(f'Magnetisation vs Temperature\n(Lattice : {N}x{M}, {iterations} iterations)')
     plt.savefig(f"data/magnetization.png", dpi=300)
-    plt.show()
+    #plt.show()
     plt.close()
 
     plt.figure(figsize=(14, 10))
@@ -96,7 +96,7 @@ def plot_data_from_file(filename: str) -> None:
     plt.axvline(c="k", linewidth=1)
     plt.title(f'Energy vs Temperature\n(Lattice : {N}x{M}, {iterations} iterations)')
     plt.savefig(f"data/energy.png", dpi=300)
-    plt.show()
+    #plt.show()
 
 def plot_different_J_graph_magnetization() -> None:
     J_values = [0.1, 0.3, 0.7, 1.3, 1.5, 2]
@@ -137,7 +137,7 @@ def plot_different_J_graph_magnetization() -> None:
     plt.legend(handles=[dotted_line, full_line,dashed_line] + J_handles, loc='upper right')
     plt.tight_layout()
     plt.savefig(f"data/magnetization.png", dpi=300)
-    plt.show()
+    #plt.show()
     plt.close()
 
 def plot_different_J_graph_energy() -> None:
@@ -174,7 +174,7 @@ def plot_different_J_graph_energy() -> None:
     plt.legend(handles=[dotted_line,dashed_line] + J_handles, loc='upper right')
     plt.tight_layout()
     plt.savefig(f"data/energy.png", dpi=300)
-    plt.show()
+    #plt.show()
     plt.close()
 
 def plot_magnetization_and_energy() -> None:
@@ -230,5 +230,5 @@ def plot_magnetization_and_energy() -> None:
     plt.subplots_adjust(right=0.80, top=0.90)
     plt.subplots_adjust(hspace=0)
     plt.savefig(f"data/combined_magnetization_and_energy.png", dpi=300)
-    plt.show()
+    #plt.show()
     plt.close()
