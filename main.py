@@ -7,8 +7,10 @@ This is the main file of the project. It will run the Ising model in parallel an
 import numpy as np
 
 from constants import number_of_simulations, J_values, t_min, t_max, iterations
-from src.graphs import plot_different_J_graph_magnetization, plot_different_J_graph_energy, plot_magnetization_and_energy
-from src.utils import create_gif, test_different_J_values
+from src.graphs import (plot_different_J_graph_magnetization, plot_different_J_graph_energy,
+                        plot_magnetization_and_energy, plot_critical_temperature_regression,
+                        plot_magnetization_and_energy_normalized)
+from src.utils import create_gif, test_different_J_values, renormalise
 
 # Create N ising model and run the simulation to get the final energy and magnetization and plot it
 
@@ -36,6 +38,12 @@ if __name__ == "__main__":
 
     #test_different_J_values(J_values, temperatures)
 
+    # Renormalise the data (to do if needed, go change the function in src/utils.py)
+
+    #renormalise(J_values)
+
     plot_different_J_graph_magnetization()
     plot_different_J_graph_energy()
     plot_magnetization_and_energy()
+    plot_critical_temperature_regression()
+    plot_magnetization_and_energy_normalized()

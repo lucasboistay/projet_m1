@@ -5,7 +5,7 @@
 N = 500 # Number of rows
 M = 500 # Number of columns
 iterations = 1000000 # Number of iterations
-J_values = [0.2, 0.5, 0.7, 1.3, 1.5, 2.] # Interaction constant list
+J_values = [0.2, 0.5, 0.7, 1, 1.3, 1.5] # Interaction constant list
 
 # Parallel processing constants
 
