@@ -2,8 +2,8 @@
 
 # General model constants
 
-N = 100 # Number of rows
-M = 100 # Number of columns
+N = 500 # Number of rows
+M = 500 # Number of columns
 iterations = 1000000 # Number of iterations
 J_values = [0.2, 0.5, 0.7, 1.3, 1.5, 2.] # Interaction constant list
 
