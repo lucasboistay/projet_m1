@@ -141,6 +141,16 @@ class IsingModel:
         """
         self.lattice[i, j] *= -1
 
+        # border conditions
+        if i == 0:
+            self.lattice[self.M-1, j] = self.lattice[i, j]
+        if i == self.M-1:
+            self.lattice[0, j] = self.lattice[i, j]
+        if j == 0:
+            self.lattice[i, self.N-1] = self.lattice[i, j]
+        if j == self.N-1:
+            self.lattice[i, 0] = self.lattice[i, j]
+
     def metropolis_step(self) -> None:
         """
         One Monte Carlo step
