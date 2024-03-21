@@ -13,6 +13,26 @@ import matplotlib.animation as animation
 K = 1
 MU = 1  # Magnetic moment unit
 
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    # Print New Line on Complete
+    if iteration == total:
+        print()
 
 # Print iterations progress
 
@@ -135,23 +155,56 @@ class IsingModel:
         else:  # If the flip is not accepted, flip the spin back
             pass
 
-    def run_monte_carlo(self, save_image=False) -> (float, float, float, float):
+    def run_monte_carlo_gif(self) -> (None):
         """
-        Run Monte Carlo simulation, possibility to save a gif of the run.
-        :param save_image: (bool) to save the gif (default: False)
-        :return: (float, float) mean energy and mean magnetization
+        Run Monte Carlo simulation to save a gif of the run.
+        :return: (None)
         """
 
         images = []
+        printProgressBar(0, self.iteration, prefix='Progress:', suffix='Complete', length=50)
+        for i in range(self.iteration):
+            self.metropolis_step()
+
+            # save an image to have 1000 images at the end
+            if i % (self.iteration // 200) == 0:
+                images.append(np.copy(self.lattice))
+            printProgressBar(i, self.iteration, prefix='GIF progress:', suffix='Complete',
+                             length=50)
+        fig, ax = plt.subplots(figsize=(10, 10))
+        ax.set_axis_off()
+
+        ims = []
+        for i in range(len(images)):
+            im = ax.imshow(images[i], cmap='gray', interpolation='nearest', animated=True, vmin=-1, vmax=1)
+            ax.set_title(rf"Ising Model Simulation ($\beta = {self.beta:.2f}$, iteration = {self.iteration:.0e})")
+            ims.append([im])
+
+        print("Creating animation...")
+
+        ani = animation.ArtistAnimation(fig, ims, interval=50, blit=True, repeat_delay=1000)
+
+        print("Saving animation...")
+
+        # Enregistrez l'animation au format GIF
+        ani.save('ising.gif', writer='pillow', fps=60, dpi=150)
+        # Enregistrez l'animation au format MP4
+        # ani.save('ising.mp4', writer='ffmpeg', fps=60, dpi=150)
+        plt.show()
+        plt.close()
+
+    def run_monte_carlo(self) -> (float, float, float, float):
+        """
+        Run Monte Carlo simulation, possibility to save a gif of the run.
+        :return: (float, float) mean energy and mean magnetization
+        """
+
         energy = []
         magnetization = []
 
         for i in range(self.iteration):
             self.metropolis_step()
 
-            # save an image to have 100 images at the end
-            if save_image and i % (self.iteration // 100) == 0:
-                images.append(np.copy(self.lattice))
             # To get the mean energy and magnetization of 100 values in the last 10000 iterations
             if i >= self.iteration - 10000 and i % 100 == 0:
                 energy.append(self.get_total_energy())
@@ -161,29 +214,5 @@ class IsingModel:
         mean_magnetization = np.mean(magnetization)
         specific_heat = np.var(energy)
         susceptibility = np.var(magnetization)
-
-        if save_image:  # Save the animation gif
-
-            fig, ax = plt.subplots(figsize=(10, 10))
-            ax.set_axis_off()
-
-            ims = []
-            for i in range(len(images)):
-                im = ax.imshow(images[i], cmap='gray', interpolation='nearest', animated=True, vmin=-1, vmax=1)
-                ax.set_title(rf"Ising Model Simulation ($\beta = {self.beta:.2f}$, iteration = {self.iteration:.0e})")
-                ims.append([im])
-
-            print("Creating animation...")
-
-            ani = animation.ArtistAnimation(fig, ims, interval=50, blit=True, repeat_delay=1000)
-
-            print("Saving animation...")
-
-            # Enregistrez l'animation au format GIF
-            ani.save('ising.gif', writer='pillow', fps=60, dpi=150)
-            # Enregistrez l'animation au format MP4
-            # ani.save('ising.mp4', writer='ffmpeg', fps=60, dpi=150)
-            plt.show()
-            plt.close()
 
         return mean_energy, mean_magnetization, specific_heat, susceptibility

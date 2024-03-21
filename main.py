@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     # Run the model once for a gif of the magnetization lattice
 
-    #create_gif(2.269, iterations)
+    create_gif(2.269, iterations)
 
     # Run the model in parallel
 
@@ -42,8 +42,8 @@ if __name__ == "__main__":
 
     #renormalise(J_values)
 
-    plot_different_J_graph_magnetization()
+    """plot_different_J_graph_magnetization()
     plot_different_J_graph_energy()
     plot_magnetization_and_energy()
     plot_critical_temperature_regression()
-    plot_magnetization_and_energy_normalized()
+    plot_magnetization_and_energy_normalized()"""

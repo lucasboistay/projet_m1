@@ -126,7 +126,7 @@ def create_gif(temperature: float, iterations: int) -> None:
     print(f"------ Creating gif for T={temperature}... ------")
     ising = IsingModel(N, M, temperature, iterations)
     ising.initialize_lattice("random")  # To get a lattice with all 1's
-    ising.run_monte_carlo(save_image=True)
+    ising.run_monte_carlo_gif()
     print("Gif created and saved as ising.gif")
 
 
