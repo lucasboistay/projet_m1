@@ -108,6 +108,8 @@ def plot_different_J_graph_magnetization() -> None:
     data_files = os.listdir('data/')
     data_files = [file for file in data_files if file.endswith('.txt')]
 
+    J_tab = []
+
     plt.figure(figsize=(10, 5))  # Adjusted the figure size for a single plot
     plt.title(f'Magnetization vs Temperature\n(Lattice: {N}x{M}, Iterations: {iterations:.0e})')
 
@@ -116,6 +118,8 @@ def plot_different_J_graph_magnetization() -> None:
         data = pd.read_csv("data/" + data_file, sep='\t')
         temperatures = data['Temperature']
         final_magnetization = data['Magnetization']
+
+        J_tab.append(J)
 
         critical_temperature, _, _ = find_critical_temperature(temperatures, final_magnetization)
 
@@ -133,7 +137,7 @@ def plot_different_J_graph_magnetization() -> None:
     dotted_line = mlines.Line2D([], [], color='black', marker='o', linestyle=':', label='Numerical Magnetization')
     full_line = mlines.Line2D([], [], color='black', linestyle='-', label='Numerical Critical Temperature')
     dashed_line = mlines.Line2D([], [], color='black', linestyle='--', label='Analytical Critical Temperature')
-    J_handles = [mlines.Line2D([], [], color=color, marker='o', linestyle='', label=f'J={J}') for J, color in zip(J_values, colors)]
+    J_handles = [mlines.Line2D([], [], color=color, marker='o', linestyle='', label=f'J={J}') for J, color in zip(J_tab, colors)]
 
     # Creating the legend
     plt.legend(handles=[dotted_line, full_line,dashed_line] + J_handles, loc='upper right')
@@ -150,6 +154,8 @@ def plot_different_J_graph_energy() -> None:
     data_files = os.listdir('data/')
     data_files = [file for file in data_files if file.endswith('.txt')]
 
+    J_tab = []
+
     plt.figure(figsize=(10, 5))  # Adjusted the figure size for a single plot
     plt.title(f'Energy vs Temperature\n(Lattice: {N}x{M}, Iterations: {iterations:.0e})')
 
@@ -158,6 +164,8 @@ def plot_different_J_graph_energy() -> None:
         data = pd.read_csv("data/" + data_file, sep='\t')
         temperatures = data['Temperature']
         final_energy = data['Energy']
+
+        J_tab.append(J)
 
         # Plot the final magnetization
         plt.plot(temperatures, final_energy/8, color + 'o', linestyle=':',
@@ -170,7 +178,7 @@ def plot_different_J_graph_energy() -> None:
     # Example handles for legend (removed susceptibility)
     dotted_line = mlines.Line2D([], [], color='black', marker='o', linestyle=':', label='Numerical Energy')
     dashed_line = mlines.Line2D([], [], color='black', linestyle='--', label='Analytical Critical Temperature')
-    J_handles = [mlines.Line2D([], [], color=color, marker='o', linestyle='', label=f'J={J}') for J, color in zip(J_values, colors)]
+    J_handles = [mlines.Line2D([], [], color=color, marker='o', linestyle='', label=f'J={J}') for J, color in zip(J_tab, colors)]
 
     # Creating the legend
     plt.legend(handles=[dotted_line,dashed_line] + J_handles, loc='upper right')
@@ -188,6 +196,7 @@ def plot_magnetization_and_energy() -> None:
     data_files = [file for file in data_files if file.endswith('.txt')]
 
     Tc_tab = []
+    J_tab = []
 
     fig, axs = plt.subplots(2, 1, figsize=(15, 10), sharex=True)
     axs[0].set_title(f'Magnetization and Energy vs Temperature\n(Lattice: {N}x{M}, Iterations: {iterations:.0e})')
@@ -201,6 +210,8 @@ def plot_magnetization_and_energy() -> None:
 
         critical_temperature, _, _ = find_critical_temperature(temperatures, final_magnetization)
         Tc_tab.append(critical_temperature)
+
+        J_tab.append(J)
 
         # Plot magnetization
         axs[0].plot(temperatures, final_magnetization, color + 'o', linestyle=':', label=f"J={J} (MC)", alpha=0.5)
@@ -222,7 +233,7 @@ def plot_magnetization_and_energy() -> None:
     full_line = mlines.Line2D([], [], color='black', linestyle='-', label='Numerical Critical Temperature')
     dashed_line = mlines.Line2D([], [], color='black', linestyle='--', label='Analytical Critical Temperature')
     J_handles = [mlines.Line2D([], [], color=color, marker='o', linestyle='', label=f'J={J} -> Compute $T_c={Tc}$') for J, color, Tc in
-                 zip(J_values, colors, Tc_tab)]
+                 zip(J_tab, colors, Tc_tab)]
 
     # Creating the legend outside the graph
     plt.legend(handles=[dotted_line, dotted_line_energy, full_line, dashed_line] + J_handles, loc='center left',
@@ -249,6 +260,7 @@ def plot_magnetization_and_energy_normalized() -> None:
     data_files = [file for file in data_files if file.endswith('.txt')]
 
     Tc_tab = []
+    J_tab = []
 
     fig, axs = plt.subplots(2, 1, figsize=(15, 10), sharex=True)
     axs[0].set_title(f'Magnetization and Energy vs Temperature\n(Lattice: {N}x{M}, Iterations: {iterations:.0e})')
@@ -268,7 +280,7 @@ def plot_magnetization_and_energy_normalized() -> None:
 
         # Plot magnetization
         axs[0].plot(temperatures, final_magnetization, color + 'o', linestyle=':', label=f"J={J} (MC)", alpha=0.2)
-        axs[0].axvline(x=critical_temperature/J, linestyle='-', color=color, alpha=0.5, label=f"Computated Tc J={J}")
+        axs[0].axvline(x=critical_temperature, linestyle='-', color=color, alpha=0.5, label=f"Computated Tc J={J}")
 
         axs[0].axvline(x=2.269 , linestyle='--', color=color, alpha=0.5, label=f"Analytical Tc J={J}")
         axs[1].axvline(x=2.269, linestyle='--', color=color, alpha=0.5, label=f"Analytical Tc J={J}")
@@ -289,7 +301,7 @@ def plot_magnetization_and_energy_normalized() -> None:
     dashed_line = mlines.Line2D([], [], color='black', linestyle='--', label='Analytical Critical Temperature')
     J_handles = [mlines.Line2D([], [], color=color, marker='o', linestyle='', label=f'J={J} -> Compute $T_c={Tc}$') for
                  J, color, Tc in
-                 zip(J_values, colors, Tc_tab)]
+                 zip(J_tab, colors, Tc_tab)]
 
     # Creating the legend outside the graph
     plt.legend(handles=[dotted_line, dotted_line_energy, full_line, dashed_line] + J_handles, loc='center left',
@@ -321,6 +333,7 @@ def plot_critical_temperature_regression():
     plt.title(f'Critical Temperature vs J\n(Lattice: {N}x{M}, Iterations: {iterations:.0e})')
 
     critical_temperatures = []
+    J_tab = []
 
     for data_file in data_files:
         J = float(data_file.split('_')[-1].split('.txt')[0])
@@ -332,8 +345,10 @@ def plot_critical_temperature_regression():
         critical_temperature, _, _ = find_critical_temperature(temperatures, final_magnetization)
         critical_temperatures.append(critical_temperature)
 
+        J_tab.append(J)
+
     # Plot the critical temperature
-    plt.plot(J_values, critical_temperatures, 'bo', label="Critical Temperature")
+    plt.plot(J_tab, critical_temperatures, 'bo', label="Critical Temperature")
 
     # Plot the regression
     results = np.polyfit(J_values, critical_temperatures, 1)

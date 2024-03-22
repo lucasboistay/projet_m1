@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     # Run the model once for a gif of the magnetization lattice
 
-    #create_gif(2.269, iterations)
+    create_gif(2.269, iterations)
 
     # Run the model in parallel
 
