@@ -93,7 +93,7 @@ def get_temperature_list(t_min: float, t_max: float, number_of_simulations: int,
     return gauss
 
 
-def run_model(N: int, M: int, temperature: float, iterations: int, J: float) -> (float, float, float, float):
+def run_model(N: int, M: int, temperature: float, iterations: int, J: float, J_tab: bool = False) -> (float, float, float, float):
     """
     Run one Ising model
     :param N: (int) Number of rows
@@ -106,9 +106,12 @@ def run_model(N: int, M: int, temperature: float, iterations: int, J: float) -> 
     global n_parrallel_done
 
     # Create an Ising model
-    ising = IsingModel(N, M, temperature, iterations, J)
+    ising = IsingModel(N, temperature, iterations, J)
 
     ising.initialize_lattice(1)  # To get a lattice with all 1's
+
+    if J_tab:
+        ising.initialize_random_J_lattice(1,0.1)
 
     energy, magnetisation, specific_heat, susceptibility = ising.run_monte_carlo()
     n_parrallel_done += 1
@@ -124,15 +127,17 @@ def create_gif(temperature: float, iterations: int) -> None:
     :return: None
     """
     print(f"------ Creating gif for T={temperature}... ------")
-    ising = IsingModel(N, M, temperature, iterations)
+    ising = IsingModel(N, temperature, iterations)
     ising.initialize_lattice("random")  # To get a lattice with all 1's
     ising.run_monte_carlo_gif()
     print("Gif created and saved as ising.gif")
 
 
-def run_parallel_ising(N_simulation: int, N_pool_processes: int, temperatures: np.ndarray, J: float = 1) -> None:
+def run_parallel_ising(N_simulation: int, N_pool_processes: int, temperatures: np.ndarray, J: float = 1,
+                        J_tab: bool = False) -> None:
     """
     Run the Ising model in parallel
+    :param J_tab:
     :param N_simulation: (int) Number of simulations
     :param N_pool_processes: (int) Number of pool processes (number of cores of your CPU)
     :param temperatures: (np.ndarray) Temperatures array
@@ -147,7 +152,7 @@ def run_parallel_ising(N_simulation: int, N_pool_processes: int, temperatures: n
         # v Run the model for each temperature v
         print("Pool of processes created")
         start_time = time.time()
-        results = p.starmap(run_model, [(N, M, temperature, iterations, J) for temperature in temperatures])
+        results = p.starmap(run_model, [(N, M, temperature, iterations, J, J_tab) for temperature in temperatures])
         final_energy, final_magnetization, specific_heat, susceptibility = zip(*results)  # Unzip the results
         end_time = time.time()
         p.close()  # Close the pool

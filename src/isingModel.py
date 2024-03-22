@@ -50,7 +50,7 @@ class IsingModel:
     run_monte_carlo: Run Monte Carlo simulation
     """
 
-    def __init__(self, M: int = 10, N: int = 10, T: float = 300, iteration: int = 1000, J: float = 1):
+    def __init__(self, N: int = 10, T: float = 300, iteration: int = 1000, J: float = 1):
         """
         Initialize Ising model
         :param M: (int) Number of rows
@@ -58,13 +58,15 @@ class IsingModel:
         :param T: (float) Temperature
         :param iteration: (int) Number of iterations
         """
-        self.M = M  # Number of rows
+        self.M = N  # Number of rows
         self.N = N  # Number of columns
         self.T = T  # Temperature
         self.iteration = iteration  # Number of iterations
         self.beta = 1 / (K * T)  # Beta
-        self.lattice = np.zeros((M, N))
+        self.lattice = np.zeros((N, N))
         self.J = J  # Interaction constant
+
+        self.J_lattice = np.ones((N, N, 4))
 
         # self.energy_history = []
         # self.magnetization_history = []
@@ -85,6 +87,59 @@ class IsingModel:
         else:
             raise ValueError("Invalid lattice type")
         return self.lattice
+
+    def get_positive_normal_distribution(self, mean, sigma):
+        """
+        Get a positive normal distribution
+        :param mean: (float) mean
+        :param sigma: (float) sigma
+        :return: (float) positive normal distribution
+        """
+        value = np.random.normal(mean, sigma)
+        while value < 0:
+            value = np.random.normal(mean, sigma)
+        return value
+
+    def initialize_random_J_lattice(self, mean, sigma) -> np.ndarray:
+        """
+        Initialize lattice with random J values, following a normal distribution with mean and sigma parameters.
+        :return: (np.ndarray) The initialized lattice
+        """
+
+        print("Initializing random J lattice...")
+
+        # First value
+        self.J_lattice[0, 0, 1] = self.get_positive_normal_distribution(mean, sigma)
+        self.J_lattice[0, 0, 2] = self.get_positive_normal_distribution(mean, sigma)
+
+        # First row
+
+        for i in range(1, self.N):
+            self.J_lattice[0, i, 1] = self.get_positive_normal_distribution(mean, sigma)
+            self.J_lattice[0, i, 2] = self.get_positive_normal_distribution(mean, sigma)
+            self.J_lattice[0, i, 3] = self.J_lattice[0, i-1, 1]  # Same value as the previous one (bonded)
+
+        # Rest of the rows
+        for i in range(1, self.N):
+            for j in range(0, self.N):
+                self.J_lattice[i, j, 0] = self.J_lattice[i-1, j, 2]  # Same value as the previous one (bonded)
+                self.J_lattice[i, j, 1] = self.get_positive_normal_distribution(mean, sigma)
+                self.J_lattice[i, j, 2] = self.get_positive_normal_distribution(mean, sigma)
+                self.J_lattice[i, j, 3] = self.J_lattice[i, j-1, 1]  # Same value as the previous one (bonded)
+
+        # Top border
+        self.J_lattice[0, :, 0] = 0
+        # Bottom border
+        self.J_lattice[-1, :, 2] = 0
+        # Left border
+        self.J_lattice[:, 0, 3] = 0
+        # Right border
+        self.J_lattice[:, -1, 1] = 0
+
+        print("Random J lattice initialized.")
+
+        return self.J_lattice
+
 
     def get_lattice(self) -> np.ndarray:
         """
@@ -107,11 +162,11 @@ class IsingModel:
         :param j: (int) Column index
         :return: (float) Energy of the site
         """
-        return 2 * self.J * self.lattice[i, j] * (
-                self.lattice[(i + 1) % self.M, j] +
-                self.lattice[i, (j + 1) % self.N] +
-                self.lattice[(i - 1) % self.M, j] +
-                self.lattice[i, (j - 1) % self.N]
+        return 2 * self.J_lattice[i, j, 1] * self.lattice[i, j] * (
+                self.lattice[(i + 1) % self.M, j] * self.J_lattice[i, j, 2] +
+                self.lattice[i, (j + 1) % self.N] * self.J_lattice[i, j, 1] +
+                self.lattice[(i - 1) % self.M, j] * self.J_lattice[i, j, 0] +
+                self.lattice[i, (j - 1) % self.N] * self.J_lattice[i, j, 3]
         )
 
     def get_total_energy(self) -> float:
@@ -160,10 +215,16 @@ class IsingModel:
 
         e = self.energy(i, j)  # Calculate energy at the site
 
-        if e < 0 or np.random.random() < np.exp(-e * self.beta):  # Accept the flip with a certain probability
-            self.flip_spin(i, j)
-        else:  # If the flip is not accepted, flip the spin back
+        self.flip_spin(i, j)  # Flip the spin
+
+        e_new = self.energy(i, j)  # Calculate new energy at the site
+
+        de = e_new - e  # Calculate energy difference
+
+        if de < 0 or np.random.random() < np.exp(-de * self.beta):  # Accept the flip with a certain probability
             pass
+        else:  # If the flip is not accepted, flip the spin back
+            self.flip_spin(i, j)  # Flip the spin
 
     def run_monte_carlo_gif(self) -> (None):
         """

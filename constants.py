@@ -9,8 +9,8 @@ J_values = [0.2, 0.5, 0.7, 1, 1.3, 1.5] # Interaction constant list
 
 # Parallel processing constants
 
-number_of_simulations = 1000 # Number of simulations for the critical temperature computation
-number_of_pool_processes = 4  # Number of pool processes, do not set it to more than the number of cores of your CPU
+number_of_simulations = 100 # Number of simulations for the critical temperature computation
+number_of_pool_processes = 6  # Number of pool processes, do not set it to more than the number of cores of your CPU
 
 # Temperature constants
 

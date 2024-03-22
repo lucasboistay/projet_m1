@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import os
 import sys
+from scipy import stats
 
 from src.utils import find_critical_temperature
 from src.utils import Onsager
@@ -124,14 +125,15 @@ def plot_different_J_graph_magnetization() -> None:
         critical_temperature, _, _ = find_critical_temperature(temperatures, final_magnetization)
 
         # Plot the final magnetization
-        plt.plot(temperatures, final_magnetization, color + 'o', linestyle=':', label=rf"Simulation data J={J} (Monte Carlo)")
+        plt.plot(temperatures, final_magnetization, color + 'o', linestyle=':',
+                 label=rf"Simulation data J={J} (Monte Carlo)", alpha=0.5)
         # plot the critical temperature line
         plt.axvline(x=critical_temperature, linestyle='-', color=color,
                     label=rf"Computated $T_c = {critical_temperature:.2f}$")
         plt.axvline(x=2.269 * J, linestyle='--', color=color, label=rf"Analytical $T_c = {2.269 * J:.2f}$")
 
     plt.ylabel(rf"Magnetization /$\mu$")
-    plt.xlabel(rf"Temperature $\times k_b/J$")
+    plt.xlabel(rf"Temperature $\times k_b$")
 
     # Example handles for legend (removed susceptibility)
     dotted_line = mlines.Line2D([], [], color='black', marker='o', linestyle=':', label='Numerical Magnetization')
@@ -169,7 +171,7 @@ def plot_different_J_graph_energy() -> None:
 
         # Plot the final magnetization
         plt.plot(temperatures, final_energy/8, color + 'o', linestyle=':',
-                 label=rf"Simulation data J={J} (Monte Carlo)") # /8 to renormalize the energy because of 4 neighbors *2
+                 label=rf"Simulation data J={J} (Monte Carlo)", alpha=0.5) # /8 to renormalize the energy because of 4 neighbors *2
         plt.axvline(x=2.269 * J, linestyle='--', color=color, label=rf"Analytical $T_c = {2.269 * J:.2f}$")
 
     plt.ylabel(rf"Energy /J")
@@ -215,7 +217,9 @@ def plot_magnetization_and_energy() -> None:
 
         # Plot magnetization
         axs[0].plot(temperatures, final_magnetization, color + 'o', linestyle=':', label=f"J={J} (MC)", alpha=0.5)
+
         axs[0].axvline(x=critical_temperature, linestyle='-', color=color, alpha=0.5, label=f"Computated Tc J={J}")
+        axs[1].axvline(x=critical_temperature, linestyle='-', color=color, alpha=0.5, label=f"Computated Tc J={J}")
 
         axs[0].axvline(x=2.269*J, linestyle='--', color=color, alpha=0.5, label=f"Analytical Tc J={J}")
         axs[1].axvline(x=2.269*J, linestyle='--', color=color, alpha=0.5, label=f"Analytical Tc J={J}")
@@ -232,7 +236,7 @@ def plot_magnetization_and_energy() -> None:
     dotted_line_energy = mlines.Line2D([], [], color='black', marker='s', linestyle=':', label='Numerical Energy', alpha=0.5)
     full_line = mlines.Line2D([], [], color='black', linestyle='-', label='Numerical Critical Temperature')
     dashed_line = mlines.Line2D([], [], color='black', linestyle='--', label='Analytical Critical Temperature')
-    J_handles = [mlines.Line2D([], [], color=color, marker='o', linestyle='', label=f'J={J} -> Compute $T_c={Tc}$') for J, color, Tc in
+    J_handles = [mlines.Line2D([], [], color=color, marker='o', linestyle='', label=f'J={J} -> Compute $T_c={Tc:.3f}$') for J, color, Tc in
                  zip(J_tab, colors, Tc_tab)]
 
     # Creating the legend outside the graph
@@ -280,13 +284,15 @@ def plot_magnetization_and_energy_normalized() -> None:
 
         # Plot magnetization
         axs[0].plot(temperatures, final_magnetization, color + 'o', linestyle=':', label=f"J={J} (MC)", alpha=0.2)
-        axs[0].axvline(x=critical_temperature, linestyle='-', color=color, alpha=0.5, label=f"Computated Tc J={J}")
+
+        axs[0].axvline(x=critical_temperature, linestyle='-', color=color, alpha=0.5, label=f"Computated Tc, J={J}")
+        axs[1].axvline(x=critical_temperature, linestyle='-', color=color, alpha=0.5, label=f"Computated Tc, J={J}")
 
         axs[0].axvline(x=2.269 , linestyle='--', color=color, alpha=0.5, label=f"Analytical Tc J={J}")
         axs[1].axvline(x=2.269, linestyle='--', color=color, alpha=0.5, label=f"Analytical Tc J={J}")
 
         # Plot energy, assuming the energy is already normalized or adjust as needed
-        axs[1].plot(temperatures, final_energy / 8, color + 's', linestyle=':', label=f"J={J} (MC)", alpha=0.5)
+        axs[1].plot(temperatures, final_energy / 8, color + 's', linestyle=':', label=f"J={J} (MC)", alpha=0.2)
 
     axs[0].set_ylabel(rf"Magnetization /$\mu$")
     axs[1].set_ylabel(rf"Energy /J")
@@ -299,7 +305,7 @@ def plot_magnetization_and_energy_normalized() -> None:
                                        alpha=0.5)
     full_line = mlines.Line2D([], [], color='black', linestyle='-', label='Numerical Critical Temperature')
     dashed_line = mlines.Line2D([], [], color='black', linestyle='--', label='Analytical Critical Temperature')
-    J_handles = [mlines.Line2D([], [], color=color, marker='o', linestyle='', label=f'J={J} -> Compute $T_c={Tc}$') for
+    J_handles = [mlines.Line2D([], [], color=color, marker='o', linestyle='', label=f'J={J} -> Compute $T_c={Tc:.3f}$') for
                  J, color, Tc in
                  zip(J_tab, colors, Tc_tab)]
 
@@ -340,7 +346,6 @@ def plot_critical_temperature_regression():
         data = pd.read_csv(f"data/{data_file}", sep='\t')
         temperatures = data['Temperature']
         final_magnetization = data['Magnetization']
-        final_energy = data['Energy']
 
         critical_temperature, _, _ = find_critical_temperature(temperatures, final_magnetization)
         critical_temperatures.append(critical_temperature)
@@ -351,10 +356,11 @@ def plot_critical_temperature_regression():
     plt.plot(J_tab, critical_temperatures, 'bo', label="Critical Temperature")
 
     # Plot the regression
-    results = np.polyfit(J_values, critical_temperatures, 1)
+    results = stats.linregress(J_values, critical_temperatures)
     a = results[0]
     b = results[1]
-    plt.plot(J_values, a * np.array(J_values) + b, 'r--', label=rf"Regression: $T_c = {a:.2f}J + {b:.2f}$")
+    r2 = results[2]**2
+    plt.plot(J_values, a * np.array(J_values) + b, 'r--', label=rf"Regression: $T_c = {a:.2f}J + {b:.2f}$, R² = {r2:.3f}")
 
     plt.ylabel(rf"Critical Temperature $\times$ k_b/J")
     plt.xlabel(rf"J")
