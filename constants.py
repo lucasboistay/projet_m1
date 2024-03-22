@@ -2,15 +2,15 @@
 
 # General model constants
 
-N = 500 # Number of rows
-M = 500 # Number of columns
+N = 100 # Number of rows
+M = 100 # Number of columns
 iterations = 1000000 # Number of iterations
 J_values = [0.2, 0.5, 0.7, 1, 1.3, 1.5] # Interaction constant list
 
 # Parallel processing constants
 
 number_of_simulations = 1000 # Number of simulations for the critical temperature computation
-number_of_pool_processes = 3  # Number of pool processes, do not set it to more than the number of cores of your CPU
+number_of_pool_processes = 4  # Number of pool processes, do not set it to more than the number of cores of your CPU
 
 # Temperature constants
 

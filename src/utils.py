@@ -49,7 +49,7 @@ def find_critical_temperature(temperature: np.ndarray, magnetization: np.ndarray
     :return: (float) Critical temperature
     """
     # Find the critical temperature by finding the temperature where the magnetization is the most changing by derivate
-    smooth_magnetization = savgol_filter(magnetization, 20, 3)  # Smooth the magnetization
+    smooth_magnetization = savgol_filter(magnetization, 40, 3)  # Smooth the magnetization
     derivative = abs(np.gradient(smooth_magnetization, temperature))
     max_derivative_index = np.argmax(derivative)
     critical_temperature = temperature[max_derivative_index]
